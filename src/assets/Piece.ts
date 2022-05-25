@@ -9,7 +9,6 @@ export class Piece implements IPiece {
 
     constructor(private ctx: CanvasRenderingContext2D) {
         this.spawn();
-        this.draw();
     }
 
     spawn(){
@@ -20,14 +19,18 @@ export class Piece implements IPiece {
     }
 
     draw(){
-        this.ctx.scale(BLOCK_SIZE, BLOCK_SIZE);
         this.ctx.fillStyle = this.color;
         this.shape.forEach((row, y) => {
-            row.forEach((value, x) => {
+            row.forEach((value, x) => {     
                 if (value > 0){
                     this.ctx.fillRect(this.xPos + x, this.yPos + y, 1, 1);
                 }
             })
         })
+    }
+
+    move(p: IPiece) {
+        this.xPos = p.xPos;
+        this.yPos = p.yPos;
     }
 }

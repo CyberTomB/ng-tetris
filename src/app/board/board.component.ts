@@ -1,5 +1,6 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { BLOCK_SIZE, COLS, ROWS } from 'src/app/constants';
+import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { BLOCK_SIZE, COLS, KEY, ROWS } from 'src/app/constants';
+import { IPiece } from 'src/assets/IPiece';
 import { Piece } from 'src/assets/Piece';
 import { boardService } from './boardservice';
 
@@ -12,6 +13,11 @@ export class BoardComponent implements OnInit {
   canvas: ElementRef<HTMLCanvasElement>;
   board: number[][];
   piece: Piece;
+  moves = {
+    [KEY.LEFT]: (p: IPiece): IPiece => ({...p, xPos: p.xPos - 1}),
+    [KEY.RIGHT]: (p: IPiece): IPiece => ({...p, xPos: p.xPos + 1}),
+    [KEY.DOWN]: (p: IPiece): IPiece => ({...p, yPos: p.yPos + 1}),
+  }
 
   ctx: CanvasRenderingContext2D;
   points: number;
@@ -27,13 +33,26 @@ export class BoardComponent implements OnInit {
 
     this.ctx.canvas.width = COLS * BLOCK_SIZE;
     this.ctx.canvas.height = ROWS * BLOCK_SIZE;
+
+    this.ctx.scale(BLOCK_SIZE, BLOCK_SIZE);
   }
 
   play(){
     this.board = boardService.getEmptyBoard();
     this.piece = new Piece(this.ctx);
+    this.piece.draw();
     console.table(this.board);
   }
 
+  @HostListener('window:keydown', ['$event'])
+  keyEvent(event: KeyboardEvent) {
+    if(this.moves[event.code]){
+      event.preventDefault();
+      const p = this.moves[event.key](this.piece); 
+      this.piece.move(p);
+      this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+      this.piece.draw();
+    }
+  }
 
 }
