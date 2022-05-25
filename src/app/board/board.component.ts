@@ -17,6 +17,7 @@ export class BoardComponent implements OnInit {
     [KEY.LEFT]: (p: IPiece): IPiece => ({...p, xPos: p.xPos - 1}),
     [KEY.RIGHT]: (p: IPiece): IPiece => ({...p, xPos: p.xPos + 1}),
     [KEY.DOWN]: (p: IPiece): IPiece => ({...p, yPos: p.yPos + 1}),
+    [KEY.SPACE]: (p: IPiece): IPiece => ({...p, yPos: p.yPos + 1})
   }
 
   ctx: CanvasRenderingContext2D;
@@ -46,10 +47,19 @@ export class BoardComponent implements OnInit {
 
   @HostListener('window:keydown', ['$event'])
   keyEvent(event: KeyboardEvent) {
+  console.log(event.code, event.key);
     if(this.moves[event.code]){
       event.preventDefault();
-      const p = this.moves[event.key](this.piece); 
-      this.piece.move(p);
+      let p = this.moves[event.code](this.piece); 
+      if(event.code === KEY.SPACE) {
+        while (gameService.valid(p, this.board)) {
+          this.piece.move(p);
+          p = this.moves[KEY.DOWN](this.piece);
+        }
+      }
+      if(gameService.valid(p, this.board)){
+        this.piece.move(p);
+      }
       this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
       this.piece.draw();
     }
