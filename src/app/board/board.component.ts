@@ -1,5 +1,6 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { BLOCK_SIZE, COLS, ROWS } from 'src/app/constants';
+import { Piece } from 'src/assets/Piece';
 import { boardService } from './boardservice';
 
 @Component({
@@ -10,6 +11,7 @@ export class BoardComponent implements OnInit {
   @ViewChild('board', {static: true})
   canvas: ElementRef<HTMLCanvasElement>;
   board: number[][];
+  piece: Piece;
 
   ctx: CanvasRenderingContext2D;
   points: number;
@@ -29,6 +31,7 @@ export class BoardComponent implements OnInit {
 
   play(){
     this.board = boardService.getEmptyBoard();
+    this.piece = new Piece(this.ctx);
     console.table(this.board);
   }
 

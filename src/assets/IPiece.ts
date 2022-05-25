@@ -1,6 +1,6 @@
 export interface IPiece {
-    x: number;
-    y: number;
+    xPos: number;
+    yPos: number;
     color: string;
     shape: number[][];
 }
