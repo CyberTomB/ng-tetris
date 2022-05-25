@@ -19,6 +19,17 @@ export class Points {
     static readonly HARD_DROP = 2;
 }
 
+export class Levels {
+    static readonly 0 = 800;
+    static readonly 1 = 720;
+    static readonly 2 = 630;
+    static readonly 3 = 550;
+    static readonly 4 = 500;
+    static readonly 5 = 450;
+}
+
+export const LINES_PER_LEVEL = 20;
+
 export const COLORS = [
     'cyan',
     'blue',

@@ -1,5 +1,5 @@
 import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
-import { BLOCK_SIZE, COLORS, COLS, KEY, Points, ROWS } from 'src/app/constants';
+import { BLOCK_SIZE, COLORS, COLS, KEY, Levels, LINES_PER_LEVEL, Points, ROWS } from 'src/app/constants';
 import { IPiece } from 'src/assets/IPiece';
 import { Piece } from 'src/assets/Piece';
 import { GameService } from './game.service';
@@ -30,6 +30,7 @@ export class BoardComponent implements OnInit {
   lines: number;
   level: number;
   time = {start: 0, elapsed: 0, level: 1000};
+  requestId: number;
   
   constructor(private service: GameService){}
 
@@ -57,16 +58,30 @@ export class BoardComponent implements OnInit {
     this.ctxNext.scale(BLOCK_SIZE, BLOCK_SIZE);
   }
 
-  drop(){
-    const p = {...this.piece, yPos: this.piece.yPos + 1}
+  drop(): boolean{
+    let p = this.moves[KEY.DOWN](this.piece);
     if(this.service.valid(p, this.board)){
       this.piece.move(p);
     } else {
       this.freeze();
+      this.clearLines();
+      if(this.piece.yPos === 0){
+        return false;
+      }
       this.piece = this.next;
       this.next = new Piece(this.ctx);
       this.next.drawNext(this.ctxNext);
     }
+    return true;
+  }
+
+  gameOver(){
+    cancelAnimationFrame(this.requestId);
+    this.ctx.fillStyle = 'black';
+    this.ctx.fillRect(1, 3, 8, 1.2);
+    this.ctx.font = '1px Arial';
+    this.ctx.fillStyle = 'red';
+    this.ctx.fillText('GAME OVER', 1.8, 4);
   }
 
   getLineClearPoints(lines: number): number{
@@ -99,8 +114,17 @@ export class BoardComponent implements OnInit {
       }
     });
     if(lines > 0 ){
-      this.points += this.getLineClearPoints(lines);
+      this.points += this.getLineClearPoints(lines) * (this.level + 1);
       this.lines += lines;
+    }
+    this.checkLevelUp();
+  }
+
+  checkLevelUp(){
+    if (this.lines >= LINES_PER_LEVEL){
+      this.level++;
+      this.lines -= LINES_PER_LEVEL;
+      this.time.level = Levels[this.level];
     }
   }
 
@@ -136,10 +160,13 @@ export class BoardComponent implements OnInit {
     this.time.elapsed = now - this.time.start;
     if(this.time.elapsed > this.time.level) {
       this.time.start = now;
-      this.drop();
+      if(!this.drop()){
+        this.gameOver();
+        return;
+      }
     }
     this.draw();
-    requestAnimationFrame(this.animate.bind(this));
+    this.requestId = requestAnimationFrame(this.animate.bind(this));
   }
 
   play(){
@@ -147,6 +174,12 @@ export class BoardComponent implements OnInit {
     this.next = new Piece(this.ctx);
     this.piece = new Piece(this.ctx);
     this.next.drawNext(this.ctxNext);
+    this.time.start = performance.now();
+
+    if (this.requestId) {
+      cancelAnimationFrame(this.requestId);
+    }
+
     this.animate();
   }
 
@@ -155,6 +188,7 @@ export class BoardComponent implements OnInit {
     this.lines = 0;
     this.level = 0;
     this.board = this.service.getEmptyBoard();
+    this.time = { start: 0, elapsed: 0, level: Levels[this.level]}
   }
 
   @HostListener('window:keydown', ['$event'])
