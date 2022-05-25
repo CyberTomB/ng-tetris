@@ -6,6 +6,22 @@ import { COLS, ROWS } from "../constants";
   providedIn: 'root'
 })
 export class GameService {
+  valid(p: IPiece, board: number[][]): boolean {
+    
+    return p.shape.every((row, dy) => {
+      return row.every((value, dx) => {
+        let x = p.xPos + dx;
+        let y = p.yPos + dy;
+        return (
+          this.isEmpty(value) ||
+          (this.insideWalls(x) &&
+          this.aboveFloor(y) &&
+          this.notOccupied(board, x, y))
+        );
+      });
+    });
+  }
+
   isEmpty(value: number): boolean {
     return value === 0;
   }
@@ -24,22 +40,6 @@ export class GameService {
 
   getEmptyBoard(): number[][] {
     return Array.from({length: ROWS}, ()=> Array(COLS).fill(0));
-  }
-
-  valid(p: IPiece, board: number[][]): boolean {
-    
-    return p.shape.every((row, dy) => {
-      return row.every((value, dx) => {
-        let x = p.xPos + dx;
-        let y = p.yPos + dy;
-        return (
-          this.isEmpty(value) ||
-          (this.insideWalls(x) &&
-          this.aboveFloor(y) &&
-          this.notOccupied(board, x, y))
-        );
-      });
-    });
   }
 
   rotate(piece: IPiece): IPiece{    
