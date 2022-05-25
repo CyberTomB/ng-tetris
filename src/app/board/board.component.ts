@@ -1,5 +1,5 @@
 import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
-import { BLOCK_SIZE, COLORS, COLS, KEY, ROWS } from 'src/app/constants';
+import { BLOCK_SIZE, COLORS, COLS, KEY, Points, ROWS } from 'src/app/constants';
 import { IPiece } from 'src/assets/IPiece';
 import { Piece } from 'src/assets/Piece';
 import { GameService } from './game.service';
@@ -25,7 +25,7 @@ export class BoardComponent implements OnInit {
 
   ctx: CanvasRenderingContext2D;
   ctxNext: CanvasRenderingContext2D;
-  points: number;
+  points: number = 0;
   lines: number;
   level: number;
   time = {start: 0, elapsed: 0, level: 1000};
@@ -33,7 +33,9 @@ export class BoardComponent implements OnInit {
   constructor(private service: GameService){}
 
   ngOnInit(): void {
-    this.initBoard()
+    this.initBoard();
+    this.initNext();
+    this.resetGame();
   }
 
   initBoard(){
@@ -65,13 +67,39 @@ export class BoardComponent implements OnInit {
     }
   }
 
+  getLineClearPoints(lines: number): number{
+    switch (lines){
+      case 1: {
+        return Points.SINGLE;
+      }
+      case 2: {
+        return Points.DOUBLE;
+      }
+      case 3: {
+        return Points.TRIPLE;
+      }
+      case 4: {
+        return Points.TETRIS;
+      }
+      default: {
+        return 0;
+      }
+    }
+  }
+
   clearLines(){
+    let lines = 0;
     this.board.forEach((row, y) => {
-      if (row.every(value => value > 0)) {
+      if (row.every(value => value !== 0)) {
+        lines++;
         this.board.splice(y, 1);
         this.board.unshift(Array(COLS).fill(0));
       }
     });
+    if(lines > 0 ){
+      this.points += this.getLineClearPoints(lines);
+      this.lines += lines;
+    }
   }
 
   freeze(){
@@ -113,11 +141,18 @@ export class BoardComponent implements OnInit {
   }
 
   play(){
-    this.board = this.service.getEmptyBoard();
+    this.resetGame();
     this.next = new Piece(this.ctx);
     this.piece = new Piece(this.ctx);
     this.animate();
     console.table(this.board);
+  }
+
+  resetGame() {
+    this.points = 0;
+    this.lines = 0;
+    this.level = 0;
+    this.board = this.service.getEmptyBoard();
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -127,13 +162,16 @@ export class BoardComponent implements OnInit {
       let p = this.moves[event.code](this.piece); 
       if(event.code === KEY.SPACE) {
         while (this.service.valid(p, this.board)) {
+          this.points += Points.HARD_DROP;
           this.piece.move(p);
           p = this.moves[KEY.DOWN](this.piece);
         }
       }
       if(this.service.valid(p, this.board)){
-        
         this.piece.move(p);
+        if(event.key === 'ArrowDown'){
+          this.points += Points.SOFT_DROP;
+        }
       }
       this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
     }
