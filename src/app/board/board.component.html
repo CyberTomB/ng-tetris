@@ -2,6 +2,7 @@
     <canvas #board class="game-board"></canvas>
     <div class="right-column">
         <div>
+            <canvas #next class="next"> </canvas>
             <h1>TETRIS</h1>
             <p>Score: {{points}}</p>
             <p>Lines: {{lines}}</p>
@@ -9,4 +10,5 @@
         </div>
         <button (click)="play()" class="play-button">Play</button>
     </div>
+
 </div>

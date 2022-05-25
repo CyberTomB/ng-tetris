@@ -30,6 +30,18 @@ export class Piece implements IPiece {
         })
     }
 
+    drawNext(ctxNext: CanvasRenderingContext2D){
+        ctxNext.clearRect(0, 0, ctxNext.canvas.width, ctxNext.canvas.height);
+        ctxNext.fillStyle = this.color;
+        this.shape.forEach((row, y) => {
+            row.forEach((value, x) => {     
+                if (value > 0){
+                    ctxNext.fillRect(x + 1, y + 2, 1, 1);
+                }
+            })
+        })
+    }
+
     move(p: IPiece) {
         this.xPos = p.xPos;
         this.yPos = p.yPos;

@@ -11,6 +11,7 @@ import { GameService } from './game.service';
 export class BoardComponent implements OnInit {
   @ViewChild('board', {static: true})
   canvas: ElementRef<HTMLCanvasElement>;
+  @ViewChild('next', {static: true})
   canvasNext: ElementRef<HTMLCanvasElement>;
   board: number[][];
   piece: Piece;
@@ -50,8 +51,8 @@ export class BoardComponent implements OnInit {
   initNext(){
     this.ctxNext = this.canvasNext.nativeElement.getContext('2d');
 
-    this.ctxNext.canvas.width = 4 * BLOCK_SIZE;
-    this.ctxNext.canvas.height = 4 * BLOCK_SIZE;
+    this.ctxNext.canvas.width = 6 * BLOCK_SIZE;
+    this.ctxNext.canvas.height = 6 * BLOCK_SIZE;
 
     this.ctxNext.scale(BLOCK_SIZE, BLOCK_SIZE);
   }
@@ -64,6 +65,7 @@ export class BoardComponent implements OnInit {
       this.freeze();
       this.piece = this.next;
       this.next = new Piece(this.ctx);
+      this.next.drawNext(this.ctxNext);
     }
   }
 
@@ -144,8 +146,8 @@ export class BoardComponent implements OnInit {
     this.resetGame();
     this.next = new Piece(this.ctx);
     this.piece = new Piece(this.ctx);
+    this.next.drawNext(this.ctxNext);
     this.animate();
-    console.table(this.board);
   }
 
   resetGame() {

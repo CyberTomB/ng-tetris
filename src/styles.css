@@ -24,3 +24,7 @@
     padding: 15px 30px;
     cursor: pointer;
 }
+
+.next {
+    border: solid 2px;
+}
