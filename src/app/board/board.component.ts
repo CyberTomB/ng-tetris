@@ -17,7 +17,7 @@ export class BoardComponent implements OnInit {
     [KEY.LEFT]: (p: IPiece): IPiece => ({...p, xPos: p.xPos - 1}),
     [KEY.RIGHT]: (p: IPiece): IPiece => ({...p, xPos: p.xPos + 1}),
     [KEY.DOWN]: (p: IPiece): IPiece => ({...p, yPos: p.yPos + 1}),
-    [KEY.UP]: (p: IPiece): IPiece => this.service.rotate(p),
+    [KEY.UP]: (p: IPiece): IPiece => { return this.service.rotate(p) },
     [KEY.SPACE]: (p: IPiece): IPiece => ({...p, yPos: p.yPos + 1})
   }
 
@@ -50,7 +50,6 @@ export class BoardComponent implements OnInit {
 
   @HostListener('window:keydown', ['$event'])
   keyEvent(event: KeyboardEvent) {
-  console.log(event.code, event.key);
     if(this.moves[event.code]){
       event.preventDefault();
       let p = this.moves[event.code](this.piece); 
@@ -61,11 +60,13 @@ export class BoardComponent implements OnInit {
         }
       }
       if(this.service.valid(p, this.board)){
+        
         this.piece.move(p);
       }
       this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-      this.piece.draw();
+      
     }
+    this.piece.draw();
   }
 
 }

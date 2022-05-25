@@ -41,7 +41,7 @@ export class GameService {
     });
   }
 
-  rotate(piece: IPiece): IPiece{
+  rotate(piece: IPiece): IPiece{    
     let clone: IPiece = JSON.parse(JSON.stringify(piece));
 
     for(let y = 0; y < clone.shape.length; ++y) {
@@ -49,8 +49,8 @@ export class GameService {
         [clone.shape[x][y], clone.shape[y][x]] = [clone.shape[y][x], clone.shape[x][y]];
       }
     }
-    clone.shape.forEach(row => row.reverse);
-
+    clone.shape.forEach(row => row.reverse());
+    
     return clone;
   }
 }

@@ -32,5 +32,6 @@ export class Piece implements IPiece {
     move(p: IPiece) {
         this.xPos = p.xPos;
         this.yPos = p.yPos;
+        this.shape = p.shape;
     }
 }
