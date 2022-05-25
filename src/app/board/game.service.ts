@@ -27,6 +27,7 @@ export class GameService {
   }
 
   valid(p: IPiece, board: number[][]): boolean {
+    
     return p.shape.every((row, dy) => {
       return row.every((value, dx) => {
         let x = p.xPos + dx;

@@ -11,8 +11,10 @@ import { GameService } from './game.service';
 export class BoardComponent implements OnInit {
   @ViewChild('board', {static: true})
   canvas: ElementRef<HTMLCanvasElement>;
+  canvasNext: ElementRef<HTMLCanvasElement>;
   board: number[][];
   piece: Piece;
+  next: Piece;
   moves = {
     [KEY.LEFT]: (p: IPiece): IPiece => ({...p, xPos: p.xPos - 1}),
     [KEY.RIGHT]: (p: IPiece): IPiece => ({...p, xPos: p.xPos + 1}),
@@ -22,6 +24,7 @@ export class BoardComponent implements OnInit {
   }
 
   ctx: CanvasRenderingContext2D;
+  ctxNext: CanvasRenderingContext2D;
   points: number;
   lines: number;
   level: number;
@@ -42,24 +45,61 @@ export class BoardComponent implements OnInit {
     this.ctx.scale(BLOCK_SIZE, BLOCK_SIZE);
   }
 
+  initNext(){
+    this.ctxNext = this.canvasNext.nativeElement.getContext('2d');
+
+    this.ctxNext.canvas.width = 4 * BLOCK_SIZE;
+    this.ctxNext.canvas.height = 4 * BLOCK_SIZE;
+
+    this.ctxNext.scale(BLOCK_SIZE, BLOCK_SIZE);
+  }
+
   drop(){
     const p = {...this.piece, yPos: this.piece.yPos + 1}
     if(this.service.valid(p, this.board)){
       this.piece.move(p);
+    } else {
+      this.freeze();
+      this.piece = this.next;
+      this.next = new Piece(this.ctx);
     }
+  }
+
+  clearLines(){
+    this.board.forEach((row, y) => {
+      if (row.every(value => value > 0)) {
+        this.board.splice(y, 1);
+        this.board.unshift(Array(COLS).fill(0));
+      }
+    });
+  }
+
+  freeze(){
+    this.piece.shape.forEach((row, y) => {
+      row.forEach((value, x) => {
+        if(value > 0) {
+          this.board[y + this.piece.yPos][x + this.piece.xPos] = value;
+        }
+      });
+    });
+    this.clearLines();    
+  }
+  
+  drawBoard() {
+    this.board.forEach((row, y) => {
+      row.forEach((value, x) => {     
+        if (value > 0){
+                this.ctx.fillStyle = COLORS[value - 1];
+                this.ctx.fillRect(x, y, 1, 1);
+            }
+        })
+    })
   }
 
   draw(){
     this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
+    this.drawBoard();
     this.piece.draw();
-    this.board.forEach((row, y) => {
-      row.forEach((value, x) => {     
-        if (value > 0){
-                this.ctx.fillStyle = COLORS[value];
-                this.ctx.fillRect(x++, y++, 1, 1);
-            }
-        })
-    })
   }
 
   animate(now = 0){
@@ -74,6 +114,7 @@ export class BoardComponent implements OnInit {
 
   play(){
     this.board = this.service.getEmptyBoard();
+    this.next = new Piece(this.ctx);
     this.piece = new Piece(this.ctx);
     this.animate();
     console.table(this.board);
