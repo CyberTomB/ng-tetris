@@ -1,7 +1,11 @@
+import { Injectable } from "@angular/core";
 import { IPiece } from "src/assets/IPiece";
 import { COLS, ROWS } from "../constants";
 
-class GameService {
+@Injectable({
+  providedIn: 'root'
+})
+export class GameService {
   isEmpty(value: number): boolean {
     return value === 0;
   }
@@ -36,6 +40,17 @@ class GameService {
       });
     });
   }
-}
 
-export const gameService = new GameService();
+  rotate(piece: IPiece): IPiece{
+    let clone: IPiece = JSON.parse(JSON.stringify(piece));
+
+    for(let y = 0; y < clone.shape.length; ++y) {
+      for (let x = 0; x < y; ++x) {
+        [clone.shape[x][y], clone.shape[y][x]] = [clone.shape[y][x], clone.shape[x][y]];
+      }
+    }
+    clone.shape.forEach(row => row.reverse);
+
+    return clone;
+  }
+}

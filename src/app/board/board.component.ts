@@ -2,7 +2,7 @@ import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular
 import { BLOCK_SIZE, COLS, KEY, ROWS } from 'src/app/constants';
 import { IPiece } from 'src/assets/IPiece';
 import { Piece } from 'src/assets/Piece';
-import { gameService } from './game.service';
+import { GameService } from './game.service';
 
 @Component({
   selector: 'game-board',
@@ -17,6 +17,7 @@ export class BoardComponent implements OnInit {
     [KEY.LEFT]: (p: IPiece): IPiece => ({...p, xPos: p.xPos - 1}),
     [KEY.RIGHT]: (p: IPiece): IPiece => ({...p, xPos: p.xPos + 1}),
     [KEY.DOWN]: (p: IPiece): IPiece => ({...p, yPos: p.yPos + 1}),
+    [KEY.UP]: (p: IPiece): IPiece => this.service.rotate(p),
     [KEY.SPACE]: (p: IPiece): IPiece => ({...p, yPos: p.yPos + 1})
   }
 
@@ -24,6 +25,8 @@ export class BoardComponent implements OnInit {
   points: number;
   lines: number;
   level: number;
+  
+  constructor(private service: GameService){}
 
   ngOnInit(): void {
     this.initBoard()
@@ -39,7 +42,7 @@ export class BoardComponent implements OnInit {
   }
 
   play(){
-    this.board = gameService.getEmptyBoard();
+    this.board = this.service.getEmptyBoard();
     this.piece = new Piece(this.ctx);
     this.piece.draw();
     console.table(this.board);
@@ -52,12 +55,12 @@ export class BoardComponent implements OnInit {
       event.preventDefault();
       let p = this.moves[event.code](this.piece); 
       if(event.code === KEY.SPACE) {
-        while (gameService.valid(p, this.board)) {
+        while (this.service.valid(p, this.board)) {
           this.piece.move(p);
           p = this.moves[KEY.DOWN](this.piece);
         }
       }
-      if(gameService.valid(p, this.board)){
+      if(this.service.valid(p, this.board)){
         this.piece.move(p);
       }
       this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
