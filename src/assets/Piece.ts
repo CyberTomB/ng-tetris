@@ -1,4 +1,4 @@
-import { BLOCK_SIZE } from "src/app/constants";
+import { BLOCK_SIZE, COLORS, SHAPES } from "src/app/constants";
 import { IPiece } from "./IPiece";
 
 export class Piece implements IPiece {
@@ -12,8 +12,9 @@ export class Piece implements IPiece {
     }
 
     spawn(){
-        this.color = 'blue';
-        this.shape = [[2, 0, 0], [2, 2, 2], [0, 0, 0]];
+        const typeId = this.randomizeTetrominoType(COLORS.length);
+        this.color = COLORS[typeId];
+        this.shape = SHAPES[typeId];
         this.xPos = 3;
         this.yPos = 0;
     }
@@ -34,4 +35,9 @@ export class Piece implements IPiece {
         this.yPos = p.yPos;
         this.shape = p.shape;
     }
+
+    
+  randomizeTetrominoType(noOfTypes: number): number {
+    return Math.floor(Math.random() * noOfTypes);
+  }
 }

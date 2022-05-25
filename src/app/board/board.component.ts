@@ -1,5 +1,5 @@
 import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
-import { BLOCK_SIZE, COLS, KEY, ROWS } from 'src/app/constants';
+import { BLOCK_SIZE, COLORS, COLS, KEY, ROWS } from 'src/app/constants';
 import { IPiece } from 'src/assets/IPiece';
 import { Piece } from 'src/assets/Piece';
 import { GameService } from './game.service';
@@ -25,6 +25,7 @@ export class BoardComponent implements OnInit {
   points: number;
   lines: number;
   level: number;
+  time = {start: 0, elapsed: 0, level: 1000};
   
   constructor(private service: GameService){}
 
@@ -41,10 +42,40 @@ export class BoardComponent implements OnInit {
     this.ctx.scale(BLOCK_SIZE, BLOCK_SIZE);
   }
 
+  drop(){
+    const p = {...this.piece, yPos: this.piece.yPos + 1}
+    if(this.service.valid(p, this.board)){
+      this.piece.move(p);
+    }
+  }
+
+  draw(){
+    this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
+    this.piece.draw();
+    this.board.forEach((row, y) => {
+      row.forEach((value, x) => {     
+        if (value > 0){
+                this.ctx.fillStyle = COLORS[value];
+                this.ctx.fillRect(x++, y++, 1, 1);
+            }
+        })
+    })
+  }
+
+  animate(now = 0){
+    this.time.elapsed = now - this.time.start;
+    if(this.time.elapsed > this.time.level) {
+      this.time.start = now;
+      this.drop();
+    }
+    this.draw();
+    requestAnimationFrame(this.animate.bind(this));
+  }
+
   play(){
     this.board = this.service.getEmptyBoard();
     this.piece = new Piece(this.ctx);
-    this.piece.draw();
+    this.animate();
     console.table(this.board);
   }
 
@@ -64,9 +95,7 @@ export class BoardComponent implements OnInit {
         this.piece.move(p);
       }
       this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-      
     }
-    this.piece.draw();
   }
 
 }
