@@ -2,7 +2,7 @@ import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular
 import { BLOCK_SIZE, COLS, KEY, ROWS } from 'src/app/constants';
 import { IPiece } from 'src/assets/IPiece';
 import { Piece } from 'src/assets/Piece';
-import { boardService } from './boardservice';
+import { gameService } from './game.service';
 
 @Component({
   selector: 'game-board',
@@ -38,7 +38,7 @@ export class BoardComponent implements OnInit {
   }
 
   play(){
-    this.board = boardService.getEmptyBoard();
+    this.board = gameService.getEmptyBoard();
     this.piece = new Piece(this.ctx);
     this.piece.draw();
     console.table(this.board);

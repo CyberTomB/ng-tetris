@@ -1,9 +1,9 @@
 import { COLS, ROWS } from "../constants";
 
-class BoardService {
+class GameService {
   getEmptyBoard(): number[][] {
     return Array.from({length: ROWS}, ()=> Array(COLS).fill(0));
   }
 }
 
-export const boardService = new BoardService();
+export const gameService = new GameService();
