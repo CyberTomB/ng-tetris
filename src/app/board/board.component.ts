@@ -13,6 +13,7 @@ export class BoardComponent implements OnInit {
   canvas: ElementRef<HTMLCanvasElement>;
   @ViewChild('next', {static: true})
   canvasNext: ElementRef<HTMLCanvasElement>;
+  isPaused: boolean = false;
   board: number[][];
   piece: Piece;
   next: Piece;
@@ -192,24 +193,47 @@ export class BoardComponent implements OnInit {
   }
 
   @HostListener('window:keydown', ['$event'])
-  keyEvent(event: KeyboardEvent) {
-    if(this.moves[event.code]){
-      event.preventDefault();
-      let p = this.moves[event.code](this.piece); 
-      if(event.code === KEY.SPACE) {
-        while (this.service.valid(p, this.board)) {
-          this.points += Points.HARD_DROP;
+  keyEvent(event: KeyboardEvent) {    
+    event.preventDefault();
+
+    if(event.code === KEY.ESC){
+      this.pauseGame();
+    }
+
+    if(!this.isPaused){
+      if(this.moves[event.code]){
+        let p = this.moves[event.code](this.piece); 
+        if(event.code === KEY.SPACE) {          
+          while (this.service.valid(p, this.board)) {
+            this.points += Points.HARD_DROP;
+            this.piece.move(p);
+            p = this.moves[KEY.DOWN](this.piece);
+          }
+        }
+        if(this.service.valid(p, this.board)){
           this.piece.move(p);
-          p = this.moves[KEY.DOWN](this.piece);
+          if(event.key === 'ArrowDown'){
+            this.points += Points.SOFT_DROP;
+          }
         }
+        this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
       }
-      if(this.service.valid(p, this.board)){
-        this.piece.move(p);
-        if(event.key === 'ArrowDown'){
-          this.points += Points.SOFT_DROP;
-        }
-      }
-      this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+    }
+  }
+
+  pauseGame(){
+    console.log("Paused");
+    if(this.isPaused){
+      this.isPaused = false;
+      this.animate();
+    } else {
+    cancelAnimationFrame(this.requestId);
+    this.ctx.fillStyle = 'black';
+    this.ctx.fillRect(1, 3, 8, 1.2);
+    this.ctx.font = '1px Arial';
+    this.ctx.fillStyle = 'yellow';
+    this.ctx.fillText('PAUSED', 1.8, 4);
+    this.isPaused = true;
     }
   }
 
